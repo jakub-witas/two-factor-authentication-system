@@ -1,0 +1,84 @@
+services:
+  main-database:
+    image: postgres:latest
+    container_name: main-database-container
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: maindb
+    volumes:
+      - ./server/models/main-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mag-network
+
+  auth-database:
+    image: postgres:latest
+    container_name: auth-database-container
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    volumes:
+      - ./auth/models/auth-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mag-network
+
+  redis-main:
+    image: redis:8-alpine
+    container_name: redis-main-container
+    ports:
+      - "6379:6379"
+    networks:
+      - mag-network
+
+  redis-auth:
+    image: redis:8-alpine
+    container_name: redis-auth-container
+    ports:
+      - "6378:6379"
+    networks:
+      - mag-network
+    
+  main-server:
+    build: ./server
+    container_name: main-server-container
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: main-database
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: maindb
+      DB_PORT: 5432
+    depends_on:
+      - main-database
+      - redis-main
+    networks:
+      - mag-network
+
+  auth-server:
+    build: ./auth
+    container_name: auth-server-container
+    ports:
+      - "3001:3000"
+    environment:
+      DB_HOST: auth-database
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: authdb
+      DB_PORT: 5432
+    depends_on:
+      - auth-database
+      - main-server
+      - redis-auth
+    networks:
+      - mag-network
+
+
+networks:
+  mag-network:
+    driver: bridge
