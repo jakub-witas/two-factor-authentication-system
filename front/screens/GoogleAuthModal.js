@@ -94,7 +94,6 @@ const TwoFactorModal = ({ visible, method, secret, onClose, onConfirm }) => {
             </>
           )}
 
-          {/* Input for code */}
           <TextInput
             value={code}
             onChangeText={setCode}
@@ -112,7 +111,6 @@ const TwoFactorModal = ({ visible, method, secret, onClose, onConfirm }) => {
             }}
           />
 
-          {/* Buttons */}
           <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
             <TouchableOpacity onPress={onClose} style={{ marginRight: 15 }}>
               <Text style={{ color: "#666" }}>Anuluj</Text>

@@ -5,8 +5,6 @@ import  styles  from '../styles/styles';
 import { logout } from '../api/auth';
 import * as SecureStore from 'expo-secure-store';
 
-
-
 const HomeScreen = ({ navigate }) => {
   const [name, setName] = useState('');
 

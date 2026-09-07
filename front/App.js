@@ -7,16 +7,8 @@ import SettingsScreen from './screens/SettingsScreen';
 
 const Router = () => {
   const [currentScreen, setCurrentScreen] = useState('welcome');
-  //const { token } = useContext(AuthContext);
 
   const navigate = (screen) => setCurrentScreen(screen);
-
-  // // simple redirect after login if token exists
-  // useEffect(() => {
-  //   if (token && (currentScreen === 'login' || currentScreen === 'register' || currentScreen === 'welcome')) {
-  //     setCurrentScreen('home');
-  //   }
-  // }, [currentScreen]);
 
   switch (currentScreen) {
     case 'welcome': return <WelcomeScreen navigate={navigate} />;

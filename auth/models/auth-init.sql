@@ -3,8 +3,6 @@ id integer NOT NULL PRIMARY KEY,
 user_id integer NOT NULL,
 method varchar(10) NOT NULL,
 secret varchar(255) DEFAULT NULL,
--- tempSecret varchar(255) DEFAULT NULL,
--- tempSecretExpires TIMESTAMP DEFAULT NULL,
 counter integer DEFAULT NULL
 );
 

@@ -13,5 +13,3 @@ VALUES
 (nextval('USERS_SEQ'), 'test@admin.pl', 'Maciej Witas', '$2a$12$nw/wI6YyBZtQNypml2G8nOGLOol/F20lOdQnv2IfhRrSEwwOJbOUa');
 
 SELECT * FROM USERS;
-
--- $2a$10$..yobv6K3yc/hMMpkLaS0u8R0DP05ajABnp/897AE2v0mksemte3W

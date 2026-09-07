@@ -1,6 +1,5 @@
 const { hotp } = require("otplib");
 const redis = require("./redisClient.js");
-// tempSecret helpers
 
 async function createTempSecret(userId, method, secret, ttlSeconds = 300) {
   const key = `tempSecret:${userId}:${method}`;
@@ -16,8 +15,6 @@ async function verifyTempSecret(userId, method) {
   await redis.del(key);
   return JSON.parse(value);
 }
-
-// HOTP helpers
 
 async function initHOTP(userId, ttlSeconds = 300) {
   const key = `HOTP:${userId}:counter`;
@@ -60,4 +57,15 @@ async function checkHOTP(userId, counter) {
   return timestamp;
 }
 
-module.exports = { checkHOTP, storeHOTP, deleteHOTP, getHOTP, incrementHOTP, initHOTP, verifyTempSecret, createTempSecret };
+const validateServerAccess = (req, res, next) => {
+  const serverSecret = req.headers['x-server-secret'];
+  
+  if (serverSecret !== process.env.SERVER_SECRET) {
+    console.warn(`UNAUTHORISED ACCESS ATTEMPT FROM ${req.ip}`);
+    return res.status(410).json({ error: 'Access denied' });
+  }
+  
+  next();
+};
+
+module.exports = { checkHOTP, storeHOTP, deleteHOTP, getHOTP, incrementHOTP, initHOTP, verifyTempSecret, createTempSecret, validateServerAccess };

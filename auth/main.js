@@ -1,23 +1,16 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const cors = require("cors");
 const sequelize = require("./config/db");
 const authRoutes = require("./routes/auth");
 const rateLimit = require("express-rate-limit");
-// const fs = require("fs");
-// const https = require("https");
 const xss = require("xss-clean");
 const helmet = require("helmet");
+const { validateServerAccess } = require('./config/helpers');
 
 dotenv.config();
 
-// const options = {
-//   key: fs.readFileSync('./ssl/localhost-key.pem'),
-//   cert: fs.readFileSync('./ssl/localhost-cert.pem')
-// };
-
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000, 
     max: 1000,
     message: "Too many login attempts from this IP, please try again after 15 minutes",
   });
@@ -27,22 +20,34 @@ const globalLimiter = rateLimit({
   console.log(">> Incoming:", req.method, req.url);
   next();
 });
-app.use(cors());
 app.use(express.json());
 app.use(globalLimiter);
 app.use(xss());
+app.use(validateServerAccess);
 app.use(helmet());
-
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: [
+      "'self'",
+      "'unsafe-inline'" 
+    ],
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'" 
+    ],
+    imgSrc: ["'self'", "data:"],
+    connectSrc: ["'self'"],
+    fontSrc: ["'self'"],
+    objectSrc: ["'none'"],
+    mediaSrc: ["'none'"],
+    frameSrc: ["'none'"]
+  }
+}));
 
 app.use("/2fa", authRoutes);
 
-
-
 const PORT = process.env.API_PORT || 3000;
-
-// https.createServer(options, app).listen(PORT, () => {
-//   console.log(`HTTPS server running on port ${PORT}`);
-// });
 
 process.on("SIGINT", async () => {
   console.log("Closing database connection...");

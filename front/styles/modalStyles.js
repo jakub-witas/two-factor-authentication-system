@@ -12,7 +12,6 @@ settingsRow: {
   paddingVertical: 14,
   paddingHorizontal: 16,
   borderBottomWidth: 1,
-  //borderBottomColor: '#eee',
   backgroundColor: '#fff',
   borderRadius: 10,
     borderWidth: 1,

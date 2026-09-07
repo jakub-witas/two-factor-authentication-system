@@ -2,7 +2,7 @@ const { createClient } = require("redis");
 
 const redis = createClient({
   socket: {
-    host: "redis-auth", //localhost if runs outside docker
+    host: "redis-auth", //localhost if runs outside docker/"redis-auth"
     port: 6379, //6378
   },
 });

@@ -178,7 +178,7 @@ export const changeEmail = async (password, newEmail) => {
   const token = await SecureStore.getItemAsync('userToken');
 
   const res = await fetch(`${API_BASE_URL}/changeEmail`, {
-    method: "POST",
+    method: "PUT",
     headers: ({ "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
               }),
@@ -197,7 +197,7 @@ export const changePassword = async (password, newPassword) => {
   const token = await SecureStore.getItemAsync('userToken');
 
   const res = await fetch(`${API_BASE_URL}/changePassword`, {
-    method: "POST",
+    method: "PUT",
     headers: ({ "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
               }),
@@ -216,7 +216,7 @@ export const deleteAccount = async (password) => {
   const token = await SecureStore.getItemAsync('userToken');
 
   const res = await fetch(`${API_BASE_URL}/deleteAccount`, {
-    method: "POST",
+    method: "DELETE",
     headers: ({ "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
               }),

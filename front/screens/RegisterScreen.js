@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View, StatusBar, Alert } from 'react-native';
+import { ScrollView, Text, TextInput, TouchableOpacity, View, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import  styles  from '../styles/styles';
-import { register } from '../api/auth';
+import * as registerController from '../controllers/registerController';
 
 
 const RegisterScreen = ({ navigate }) => {
@@ -13,27 +13,6 @@ const RegisterScreen = ({ navigate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const onSubmit = async () => {
-    if (!name || !email || !password || !confirmPassword) 
-      return Alert.alert('Błąd', 'Wypełnij wszystkie pola');
-    if (password !== confirmPassword) 
-      return Alert.alert('Błąd', 'Hasła nie są identyczne');
-
-    try {
-      setLoading(true);
-      const response = await register(name, email, password);
-
-      if (response) {
-        Alert.alert("Sukces", "Konto utworzone, możesz się teraz zalogować");
-        navigate("login");
-      }
-    } catch (error) {
-      Alert.alert("Błąd rejestracji", error.message || "Spróbuj ponownie");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
@@ -122,7 +101,9 @@ const RegisterScreen = ({ navigate }) => {
           </View>
         </View>
         
-        <TouchableOpacity style={styles.primaryButton} onPress={onSubmit} disabled={loading}>
+        <TouchableOpacity style={styles.primaryButton} 
+        onPress={async () => registerController.onSubmit(name, email, password, confirmPassword, setLoading, navigate)} 
+        disabled={loading}>
           <Text style={styles.primaryButtonText}>{loading ? 'Tworzenie konta...' : 'Zarejestruj się'}</Text>
         </TouchableOpacity>
       </View>

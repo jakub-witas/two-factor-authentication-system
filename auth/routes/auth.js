@@ -81,7 +81,7 @@ try{
 }
 });
 
-router.post("/remove", async(req, res) => {
+router.delete("/remove", async(req, res) => {
 try{
   const id = req.body.id;
 
@@ -224,7 +224,7 @@ router.post("/confirm", async (req, res) => {
     }
 
     await Auth.update(
-      { secret: await encryptSecret(tempSecretData.secret),
+      { secret: encryptSecret(tempSecretData.secret),
         counter: exists.method === "email" ? await getHOTP(id) : null
        },
       { where: { id: exists.id } }

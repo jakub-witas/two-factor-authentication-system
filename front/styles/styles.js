@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
 
 centerContent: {
   flex: 1,
-  justifyContent: 'center', // vertically centers for short content
+  justifyContent: 'center',
 },
 
   welcomeHeader: {
@@ -26,11 +26,6 @@ centerContent: {
     alignItems: 'center',
   },
 
-  // scrollContent: {
-  //   flexGrow: 1,
-  //   padding: 24,
-  //   justifyContent: "center",
-  // },
 
   backButton: {
     position: "absolute",
@@ -274,7 +269,6 @@ cardText: {
     fontWeight: '600',
   },
 
-  //settings
 
   settingsHeader: {
   marginBottom: 20,
@@ -358,7 +352,6 @@ optionDesc: {
   color: "#888",
 },
 
-// Modal
 modalOverlay: {
   flex: 1,
   justifyContent: "center",
