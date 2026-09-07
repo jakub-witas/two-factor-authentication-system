@@ -1,6 +1,6 @@
 # Mobile 2FA Authentication Demo
 
-> Aplikacja mobilna Expo prezentująca rejestrację, logowanie i zarządzanie uwierzytelnianiem wieloskładnikowym.
+> A mobile Expo application demonstrating registration, login, and multi-factor authentication management.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo&logoColor=white)](https://expo.dev/)
@@ -10,98 +10,98 @@
 [![Tests](https://img.shields.io/badge/tests-Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
 
 
-Projekt jest demonstracyjną aplikacją mobilną przygotowaną na potrzeby pracy magisterskiej. Frontend działa w Expo/React Native, a backend składa się z dwóch usług Express: serwera głównego odpowiedzialnego za konta użytkowników oraz wydzielonego serwera obsługującego dane i operacje 2FA.
+This project is a demo mobile application prepared for a master's thesis. The frontend runs on Expo/React Native, and the backend consists of two Express services: a main server responsible for user accounts and a dedicated server handling 2FA data and operations.
 
-## Spis treści
+## Table of Contents
 
-- [Najważniejsze funkcje](#najważniejsze-funkcje)
-- [Technologie](#technologie)
-- [Architektura](#architektura)
-- [Uruchomienie](#uruchomienie)
-- [Konfiguracja](#konfiguracja)
-- [Użycie](#użycie)
-- [Testy](#testy)
-- [Dalszy rozwój](#dalszy-rozwój)
+- [Key Features](#key-features)
+- [Technologies](#technologies)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Tests](#tests)
+- [Further Development](#further-development)
 
-## Najważniejsze funkcje
+## Key Features
 
-- rejestracja użytkownika z walidacją adresu e-mail i hasła,
-- logowanie z tokenem JWT ważnym 15 minut,
-- opcjonalne uwierzytelnianie dwuskładnikowe przez kod e-mail, Google Authenticator (TOTP) lub biometrię urządzenia,
-- tymczasowe sesje logowania i kody OTP przechowywane w Redisie,
-- bezpieczne przechowywanie tokenu sesji w `expo-secure-store`,
-- wylogowanie z unieważnieniem aktywnego tokenu,
-- zmiana hasła i adresu e-mail,
-- włączenie, potwierdzenie i wyłączenie 2FA,
-- usunięcie konta wraz z powiązaną konfiguracją 2FA,
-- zabezpieczenia HTTP: Helmet, filtrowanie XSS, walidacja wejścia i rate limiting.
+- user registration with email and password validation,
+- login with a JWT token valid for 15 minutes,
+- optional multi-factor authentication via email code, Google Authenticator (TOTP), or device biometrics,
+- temporary login sessions and OTP codes stored in Redis,
+- secure storage of the session token in `expo-secure-store`,
+- logout with revocation of the active token,
+- password and email address changes,
+- enabling, confirming, and disabling 2FA,
+- account deletion along with the associated 2FA configuration,
+- HTTP security measures: Helmet, XSS filtering, input validation, and rate limiting.
 
-## Technologie
+## Technologies
 
-| Obszar | Technologie |
+| Area | Technologies |
 | --- | --- |
-| Aplikacja mobilna | Expo SDK 54, React 19, React Native 0.79 |
+| Mobile app | Expo SDK 54, React 19, React Native 0.79 |
 | API | Node.js 18, Express 4 |
-| Dane użytkowników | PostgreSQL, Sequelize 6 |
-| Dane tymczasowe i sesje | Redis |
-| Uwierzytelnianie | JWT, bcryptjs, otplib, `expo-local-authentication` |
-| Magazyn na urządzeniu | `expo-secure-store` |
-| E-mail 2FA | Nodemailer, SMTP |
-| Testy | Vitest, Supertest, Testing Library dla React Native, happy-dom |
-| Uruchamianie usług | Docker, Docker Compose |
+| User data | PostgreSQL, Sequelize 6 |
+| Temporary data and sessions | Redis |
+| Authentication | JWT, bcryptjs, otplib, `expo-local-authentication` |
+| On-device storage | `expo-secure-store` |
+| Email 2FA | Nodemailer, SMTP |
+| Testing | Vitest, Supertest, Testing Library for React Native, happy-dom |
+| Service orchestration | Docker, Docker Compose |
 
-## Architektura
+## Architecture
 
 ```text
-Projekt/
-├── front/                 # Aplikacja Expo/React Native
-│   ├── api/               # Wywołania API i sesja użytkownika
-│   ├── controllers/       # Logika formularzy logowania i ustawień
-│   ├── screens/           # Ekrany aplikacji i modale
-│   ├── styles/            # Style React Native
-│   └── __tests__/         # Testy klienta
-├── server/                # Główny API użytkowników
-│   ├── config/            # Baza danych, Redis, JWT i limity
-│   ├── models/            # Model użytkownika i SQL inicjalizacyjny
-│   ├── routes/            # Rejestracja, logowanie, konto i 2FA
-│   └── __tests__/         # Testy API i modeli
-├── auth/                  # Wydzielony API 2FA
-│   ├── config/            # Redis, SMTP, szyfrowanie sekretów
-│   ├── models/            # Model konfiguracji 2FA i SQL inicjalizacyjny
-│   ├── routes/            # Operacje na kodach i metodach 2FA
-│   └── __tests__/         # Testy API, kryptografii i helperów
+Project/
+├── front/                 # Expo/React Native application
+│   ├── api/               # API calls and user session
+│   ├── controllers/       # Login and settings form logic
+│   ├── screens/           # App screens and modals
+│   ├── styles/            # React Native styles
+│   └── __tests__/         # Client tests
+├── server/                # Main user API
+│   ├── config/            # Database, Redis, JWT, and rate limits
+│   ├── models/            # User model and init SQL
+│   ├── routes/            # Registration, login, account, and 2FA
+│   └── __tests__/         # API and model tests
+├── auth/                  # Dedicated 2FA API
+│   ├── config/            # Redis, SMTP, secret encryption
+│   ├── models/            # 2FA configuration model and init SQL
+│   ├── routes/            # Code and 2FA method operations
+│   └── __tests__/         # API, cryptography, and helper tests
 └── README.md
 ```
 
-### Przepływ logowania z 2FA
+### Login Flow with 2FA
 
-1. Aplikacja wysyła dane logowania do `server`.
-2. Serwer główny sprawdza konto i pyta `auth-server`, czy użytkownik ma aktywne 2FA.
-3. Dla e-maila lub Google Authenticator klient wyświetla formularz kodu; dla biometrii korzysta z mechanizmu systemowego urządzenia.
-4. Po pomyślnej weryfikacji serwer główny wystawia JWT, który klient zapisuje w `expo-secure-store`.
+1. The app sends login credentials to `server`.
+2. The main server verifies the account and asks `auth-server` whether the user has active 2FA.
+3. For email or Google Authenticator, the client displays a code entry form; for biometrics, it uses the device's system mechanism.
+4. Upon successful verification, the main server issues a JWT, which the client stores in `expo-secure-store`.
 
-Serwery komunikują się między sobą przez `AUTH_API_URL` i nagłówek `X-Server-Secret`.
+The servers communicate with each other via `AUTH_API_URL` and the `X-Server-Secret` header.
 
-## Uruchomienie
+## Getting Started
 
-### Wymagania
+### Requirements
 
-- Docker Desktop z Docker Compose,
-- Node.js 18 lub nowszy,
+- Docker Desktop with Docker Compose,
+- Node.js 18 or newer,
 - npm,
-- urządzenie lub emulator obsługujący Expo.
+- a device or emulator supporting Expo.
 
 ### Backend
 
-Jeśli w repozytorium znajduje się konfiguracja Compose, uruchom w katalogu głównym:
+If a Compose configuration is present in the repository, run the following in the root directory:
 
 ```bash
 docker compose up -d --build
 ```
 
-Typowa konfiguracja uruchamia główny serwer API, serwer 2FA, dwie bazy PostgreSQL oraz dwie instancje Redis.
+A typical configuration starts the main API server, the 2FA server, two PostgreSQL databases, and two Redis instances.
 
-### Aplikacja mobilna
+### Mobile App
 
 ```bash
 cd front
@@ -109,84 +109,84 @@ npm install
 npm start
 ```
 
-Następnie wybierz urządzenie lub emulator w interfejsie Expo. Przed uruchomieniem na fizycznym urządzeniu sprawdź adres `API_BASE_URL` w `front/api/auth.js` i dopasuj go do adresu komputera dostępnego z urządzenia.
+Then select a device or emulator in the Expo interface. Before running on a physical device, check the `API_BASE_URL` address in `front/api/auth.js` and match it to an address for your computer that is reachable from the device.
 
-## Konfiguracja
+## Configuration
 
-Pliki `.env` są używane przez backendy. Nie należy publikować ich zawartości ani wpisywać sekretów bezpośrednio do repozytorium.
+`.env` files are used by the backends. Their contents should not be published, and secrets should not be entered directly into the repository.
 
 ### `server/.env`
 
-| Zmienna | Znaczenie |
+| Variable | Meaning |
 | --- | --- |
-| `DB_USER` | Użytkownik głównej bazy PostgreSQL |
-| `DB_PASSWORD` | Hasło głównej bazy PostgreSQL |
-| `DB_DATABASE` | Nazwa głównej bazy danych |
-| `DB_PORT` | Port bazy danych |
-| `JWT_SECRET` | Sekret do podpisywania tokenów JWT |
-| `SERVER_SECRET` | Sekret komunikacji z serwerem 2FA |
-| `API_PORT` | Port głównego API |
-| `AUTH_API_URL` | Bazowy adres serwera 2FA |
-| `NODE_ENV` | Tryb pracy, wpływa między innymi na reguły CORS |
+| `DB_USER` | Main PostgreSQL database user |
+| `DB_PASSWORD` | Main PostgreSQL database password |
+| `DB_DATABASE` | Main database name |
+| `DB_PORT` | Database port |
+| `JWT_SECRET` | Secret for signing JWT tokens |
+| `SERVER_SECRET` | Secret for communication with the 2FA server |
+| `API_PORT` | Main API port |
+| `AUTH_API_URL` | Base address of the 2FA server |
+| `NODE_ENV` | Runtime mode, affects CORS rules among other things |
 
 ### `auth/.env`
 
-| Zmienna | Znaczenie |
+| Variable | Meaning |
 | --- | --- |
-| `DB_USER` | Użytkownik bazy PostgreSQL 2FA |
-| `DB_PASSWORD` | Hasło bazy PostgreSQL 2FA |
-| `DB_DATABASE` | Nazwa bazy danych 2FA |
-| `DB_PORT` | Port bazy danych 2FA |
-| `API_PORT` | Port API 2FA |
-| `API_BASE_URL` | Bazowy adres używany przez konfigurację usługi |
-| `SMTP_USER` | Użytkownik serwera SMTP |
-| `SMTP_PASS` | Hasło serwera SMTP |
-| `SECRET_KEY` | Klucz szyfrowania sekretów 2FA |
-| `SERVER_SECRET` | Sekret weryfikowany w komunikacji między usługami |
+| `DB_USER` | 2FA PostgreSQL database user |
+| `DB_PASSWORD` | 2FA PostgreSQL database password |
+| `DB_DATABASE` | 2FA database name |
+| `DB_PORT` | 2FA database port |
+| `API_PORT` | 2FA API port |
+| `API_BASE_URL` | Base address used by the service configuration |
+| `SMTP_USER` | SMTP server user |
+| `SMTP_PASS` | SMTP server password |
+| `SECRET_KEY` | Encryption key for 2FA secrets |
+| `SERVER_SECRET` | Secret verified in inter-service communication |
 
-W środowisku innym niż lokalne wartości sekretów, poświadczeń baz i SMTP należy dostarczyć bezpiecznie, poza repozytorium.
+In environments other than local, secret values, database credentials, and SMTP credentials should be provided securely, outside the repository.
 
-## Użycie
+## Usage
 
-Po uruchomieniu aplikacji mobilnej:
+After launching the mobile app:
 
-1. Wybierz **Utwórz konto** i zarejestruj nazwę, e-mail oraz hasło.
-2. Zaloguj się przy użyciu utworzonych danych.
-3. Otwórz **Ustawienia**, aby włączyć e-mail, Google Authenticator lub biometrię.
-4. Przy konfiguracji e-maila wpisz kod dostarczony przez SMTP; przy Google Authenticator otwórz lub skopiuj wygenerowany link/sekret, a następnie potwierdź kodem.
-5. Z poziomu ustawień możesz także zmienić hasło, zmienić e-mail albo usunąć konto.
+1. Select **Create Account** and register a name, email, and password.
+2. Log in using the credentials you created.
+3. Open **Settings** to enable email, Google Authenticator, or biometrics.
+4. When setting up email, enter the code sent via SMTP; for Google Authenticator, open or copy the generated link/secret and then confirm with a code.
+5. From Settings, you can also change your password, change your email, or delete your account.
 
-Przykładowe wywołania API:
+Sample API calls:
 
 ```bash
-# Rejestracja
+# Registration
 curl -X POST http://localhost:3000/api/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Jan Kowalski","email":"jan@example.com","password":"<your-password>"}'
 
-# Logowanie bez aktywnego 2FA
+# Login without active 2FA
 curl -X POST http://localhost:3000/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"jan@example.com","password":"<your-password>"}'
 
-# Health check głównego API
+# Health check for the main API
 curl http://localhost:3000/api/health
 ```
 
-Odpowiedź logowania zawiera token JWT, jeśli konto nie wymaga dodatkowego kroku 2FA. Gdy 2FA jest aktywne, odpowiedź zawiera informację o metodzie i tymczasowej sesji potrzebnej do potwierdzenia kodu.
+The login response contains a JWT token if the account does not require an additional 2FA step. When 2FA is active, the response contains information about the method and the temporary session needed to confirm the code.
 
-## Testy
+## Tests
 
-Każdy moduł ma własny `package.json` i konfigurację Vitest. Zależności należy zainstalować w katalogu modułu przed uruchomieniem testów.
+Each module has its own `package.json` and Vitest configuration. Dependencies must be installed in the module's directory before running tests.
 
 ```bash
-# Backend użytkowników
+# User backend
 cd server
 npm install
 npm test
 npm run test:coverage
 
-# Serwer 2FA
+# 2FA server
 cd ../auth
 npm install
 npm test
@@ -199,14 +199,14 @@ npm run test:run
 npm run test:coverage
 ```
 
-Serwery `auth` i `server` udostępniają również skrypty związane z testową bazą PostgreSQL, jeśli są obecne w ich aktualnych plikach `package.json`.
+The `auth` and `server` services also provide scripts related to a test PostgreSQL database, if present in their current `package.json` files.
 
-## Dalszy rozwój
+## Further Development
 
-Na podstawie obecnej struktury naturalnymi kolejnymi krokami są:
+Based on the current structure, natural next steps include:
 
-- przeniesienie adresu API klienta mobilnego do konfiguracji Expo zamiast stałej w kodzie,
-- dodanie automatycznego CI dla testów trzech modułów,
-- uzupełnienie testów integracyjnych dla pełnego przepływu między `server` i `auth`,
-- rozdzielenie konfiguracji deweloperskiej i produkcyjnej oraz bezpieczne zarządzanie sekretami,
-- dodanie ekranów lub narzędzi do obserwowania stanu usług w środowisku wdrożeniowym.
+- moving the mobile client's API address to Expo configuration instead of a hardcoded value in the code,
+- adding automated CI for testing all three modules,
+- adding integration tests for the full flow between `server` and `auth`,
+- separating development and production configuration and managing secrets securely,
+- adding screens or tools for monitoring service status in the deployment environment.
